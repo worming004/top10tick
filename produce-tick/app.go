@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/segmentio/kafka-go"
@@ -68,7 +69,7 @@ func (ab *AppBuilder) Build() *App {
 		Balancer: &kafka.Hash{},
 	}
 
-	tickServer := NewTickServer(ab.TickName, writer)
+	tickServer := NewTickServer(ab.TickName, writer, 50*time.Millisecond)
 	return &App{
 		AppConfig:  ab.AppConfig,
 		writer:     writer,

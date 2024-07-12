@@ -15,14 +15,15 @@ var deviations []float64
 
 func init() {
 	mapped := map[int]float64{
-		1:     10,
-		2:     8,
-		3:     6,
-		5:     4,
-		80:    2,
-		200:   1,
-		1000:  0.5,
-		10000: 0.2,
+		1:      30,
+		10:     10,
+		20:     8,
+		30:     6,
+		50:     4,
+		800:    2,
+		2000:   1,
+		10000:  0.5,
+		100000: 0.2,
 	}
 
 	count := 0
@@ -36,7 +37,7 @@ func init() {
 	for k, v := range mapped {
 		for i := 0; i < k; i++ {
 			deviations[i] = -v
-			deviations[count-i-1] = v
+			deviations[count-i-1] = v + 0.001
 		}
 	}
 }
