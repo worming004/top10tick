@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"math/rand"
 	"net"
@@ -15,7 +16,8 @@ import (
 const TOPIC_NAME = "all-ticks"
 
 type AppConfig struct {
-	KafkaBootstratServers string `env:"KAFKA_BOOTSTRAP_SERVERS" env-default:"my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"`
+	KafkaBootstratServers string        `env:"KAFKA_BOOTSTRAP_SERVERS" env-default:"my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"`
+	DurationBetweenPush   time.Duration `env:"DURATION_BETWEEN_PUSH" env-default:"5ms"`
 }
 
 func init() {
@@ -28,7 +30,15 @@ func init() {
 
 func main() {
 	ac := AppConfig{}
-	cleanenv.ReadEnv(&ac)
+	err := cleanenv.ReadEnv(&ac)
+	if err != nil {
+		panic(err)
+	}
+	if ac.DurationBetweenPush < 1*time.Millisecond {
+		slog.Error("DurationBetweenPush must be greater than 1ms")
+		panic("stop because of config")
+	}
+	slog.Info("AppConfig", "duration", fmt.Sprintf("%v", ac.DurationBetweenPush))
 	appBuilder := NewAppBuilder(ac)
 	appBuilder.WithRandomTickName()
 	app := appBuilder.Build()
@@ -69,7 +79,7 @@ func (ab *AppBuilder) Build() *App {
 		Balancer: &kafka.Hash{},
 	}
 
-	tickServer := NewTickServer(ab.TickName, writer, 50*time.Millisecond)
+	tickServer := NewTickServer(ab.TickName, writer, ab.DurationBetweenPush)
 	return &App{
 		AppConfig:  ab.AppConfig,
 		writer:     writer,
