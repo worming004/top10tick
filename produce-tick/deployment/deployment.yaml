@@ -10,7 +10,7 @@ spec:
   selector:
     matchLabels:
       app: produce-tick
-  replicas: 100
+  replicas: 10
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -36,6 +36,9 @@ spec:
           limits:
             cpu: 100m
             memory: 100Mi
+        env:
+            - name: DURATION_BETWEEN_PUSH
+              value: 20ms
         ports:
         - containerPort:  80
           name:  produce-tick
